@@ -1,5 +1,5 @@
 {
-  "timeline_index": 46,
+  "timeline_index": 48,
   "planner": {
     "Team Leader": {
       "1": {
@@ -26,9 +26,10 @@
         "code": "",
         "result": "",
         "is_success": false,
-        "is_finished": false,
+        "is_finished": true,
         "assignee": "Alex",
-        "start_at": 1757168490.2938342
+        "start_at": 1757168490.2938342,
+        "end_at": 1757168906.3997924
       }
     },
     "Data Analyst": {
@@ -125,7 +126,9 @@
     "43": 1,
     "44": 1,
     "45": 1,
-    "46": 1
+    "46": 1,
+    "47": 1,
+    "48": 1
   },
   "preview_servers": {},
   "preview_server": null
