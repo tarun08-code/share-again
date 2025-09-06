@@ -1,0 +1,191 @@
+$ find /workspace -name "*.html" -o -name "*.css" -o -name "*.js" -o -name "*.json" | head -20
+/workspace/.timeline.json
+/workspace/uploads/Papershare Website Design/.storage/2/cb3db3b8/c46f192a-c740-4216-ad55-6cd14d6734b2.json
+/workspace/uploads/Papershare Website Design/.storage/3/4d31780b/test-e866ba7a-06e3-4057-b517-a65d5d661eea.json
+/workspace/uploads/Papershare Website Design/.storage/30/3a9fe8b5/index.html
+/workspace/uploads/Papershare Website Design/.storage/32/d5d1f8dc/81fa6896-bdde-49ca-a6af-c4b698aa7a12.json
+/workspace/uploads/Papershare Website Design/.storage/33/3926052c/03480136-2078-4b50-94bd-45c956f68a78.json
+/workspace/uploads/Papershare Website Design/.storage/42/a3eb7fce/a8ccbfe1-4cf6-4eee-b286-34fe04fc95d6.json
+/workspace/uploads/Papershare Website Design/.storage/43/476d66b7/bec2b618-2395-4143-8324-7914a4799cec.json
+/workspace/uploads/Papershare Website Design/.storage/9/9052bc18/index.html
+/workspace/uploads/Papershare Website Design/build/v1/assets/index-ByVjdUda.js
+/workspace/uploads/Papershare Website Design/build/v1/assets/index-a73KHCYb.css
+/workspace/uploads/Papershare Website Design/build/v1/index.html
+/workspace/uploads/Papershare Website Design/workspace/.MGXEnv.json
+/workspace/uploads/Papershare Website Design/workspace/.MGXTools/ad7525f06af743aaacb50fe81597e34f.json
+/workspace/uploads/Papershare Website Design/workspace/.timeline.json
+/workspace/uploads/Papershare Website Design/workspace/shadcn-ui/components.json
+/workspace/uploads/Papershare Website Design/workspace/shadcn-ui/dist/assets/index-D2x_-ioc.css
+/workspace/uploads/Papershare Website Design/workspace/shadcn-ui/dist/assets/index-DUf0XXAe.js
+/workspace/uploads/Papershare Website Design/workspace/shadcn-ui/dist/index.html
+/workspace/uploads/Papershare Website Design/workspace/shadcn-ui/eslint.config.js
+$ cd "/workspace/uploads/Papershare Website Design/workspace/shadcn-ui"
+
+$ cp -r "/workspace/uploads/Papershare Website Design/workspace/shadcn-ui" /workspace/papershare-fixed
+
+$ cd /workspace/papershare-fixed
+
+$ ls -la /workspace/papershare-fixed/
+
+total 14181
+drwxr-xr-x  113 root root  1372160 Sep  6 06:34 .
+drwxr-xr-x 1008 root root 12603392 Sep  6 06:34 ..
+-rw-r--r--    1 root root      253 Sep  6 06:34 .gitignore
+drwxr-xr-x    3 root root     8192 Sep  6 06:34 .mgx
+-rw-r--r--    1 root root     1322 Sep  6 06:34 README.md
+-rw-r--r--    1 root root      414 Sep  6 06:34 components.json
+drwxr-xr-x    3 root root     8192 Sep  6 06:34 dist
+-rw-r--r--    1 root root      789 Sep  6 06:34 eslint.config.js
+-rw-r--r--    1 root root     1015 Sep  6 06:34 index.html
+-rw-r--r--    1 root root     2954 Sep  6 06:34 package.json
+-rw-r--r--    1 root root   188572 Sep  6 06:34 pnpm-lock.yaml
+-rw-r--r--    1 root root       80 Sep  6 06:34 postcss.config.js
+drwxr-xr-x    3 root root     8192 Sep  6 06:34 public
+drwxr-xr-x   60 root root   315392 Sep  6 06:34 src
+-rw-r--r--    1 root root     2836 Sep  6 06:34 tailwind.config.ts
+-rw-r--r--    1 root root      818 Sep  6 06:34 template_config.json
+-rw-r--r--    1 root root     1877 Sep  6 06:34 todo.md
+-rw-r--r--    1 root root      652 Sep  6 06:34 tsconfig.app.json
+-rw-r--r--    1 root root      381 Sep  6 06:34 tsconfig.json
+-rw-r--r--    1 root root      481 Sep  6 06:34 tsconfig.node.json
+-rw-r--r--    1 root root      430 Sep  6 06:34 vite.config.ts
+$ pnpm install
+
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +427
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 427, reused 0, downloaded 0, added 0
+
+   ╭───────────────────────────────────────────────────────────────────╮
+   │                                                                   │
+   │                Update available! 8.10.0 → 10.15.1.                │
+   │   Changelog: https://github.com/pnpm/pnpm/releases/tag/v10.15.1   │
+   │     Run "corepack prepare pnpm@10.15.1 --activate" to update.     │
+   │                                                                   │
+   │      Follow @pnpmjs for updates: https://twitter.com/pnpmjs       │
+   │                                                                   │
+   ╰───────────────────────────────────────────────────────────────────╯
+
+Progress: resolved 427, reused 0, downloaded 1, added 0
+Progress: resolved 427, reused 0, downloaded 32, added 27
+ WARN  GET https://registry.npmjs.org/lucide-react/-/lucide-react-0.462.0.tgz error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+Progress: resolved 427, reused 0, downloaded 63, added 58
+Progress: resolved 427, reused 0, downloaded 81, added 68
+Progress: resolved 427, reused 0, downloaded 97, added 85
+Progress: resolved 427, reused 0, downloaded 107, added 103
+Progress: resolved 427, reused 0, downloaded 132, added 128
+Progress: resolved 427, reused 0, downloaded 155, added 146
+Progress: resolved 427, reused 0, downloaded 181, added 170
+Progress: resolved 427, reused 0, downloaded 213, added 198
+Progress: resolved 427, reused 0, downloaded 225, added 215
+Progress: resolved 427, reused 0, downloaded 247, added 233
+Progress: resolved 427, reused 0, downloaded 268, added 252
+Progress: resolved 427, reused 0, downloaded 278, added 266
+Progress: resolved 427, reused 0, downloaded 295, added 285
+Progress: resolved 427, reused 0, downloaded 323, added 311
+Progress: resolved 427, reused 0, downloaded 356, added 349
+Progress: resolved 427, reused 0, downloaded 366, added 361
+Progress: resolved 427, reused 0, downloaded 386, added 375
+Progress: resolved 427, reused 0, downloaded 399, added 393
+Progress: resolved 427, reused 0, downloaded 418, added 411
+Progress: resolved 427, reused 0, downloaded 419, added 413
+Progress: resolved 427, reused 0, downloaded 421, added 414
+Progress: resolved 427, reused 0, downloaded 423, added 416
+Progress: resolved 427, reused 0, downloaded 423, added 418
+Progress: resolved 427, reused 0, downloaded 423, added 419
+Progress: resolved 427, reused 0, downloaded 423, added 422
+Progress: resolved 427, reused 0, downloaded 425, added 423
+Progress: resolved 427, reused 0, downloaded 426, added 423
+Progress: resolved 427, reused 0, downloaded 427, added 423
+Progress: resolved 427, reused 0, downloaded 427, added 424
+Progress: resolved 427, reused 0, downloaded 427, added 425
+Progress: resolved 427, reused 0, downloaded 427, added 426
+Progress: resolved 427, reused 0, downloaded 427, added 427, done
+.../node_modules/@swc/core postinstall$ node postinstall.js
+.../esbuild@0.25.8/node_modules/esbuild postinstall$ node install.js
+.../esbuild@0.21.5/node_modules/esbuild postinstall$ node install.js
+.../node_modules/@swc/core postinstall: Done
+.../esbuild@0.25.8/node_modules/esbuild postinstall: Done
+.../esbuild@0.21.5/node_modules/esbuild postinstall: Done
+
+dependencies:
++ @hookform/resolvers 3.10.0
++ @radix-ui/react-accordion 1.2.11
++ @radix-ui/react-alert-dialog 1.1.14
++ @radix-ui/react-aspect-ratio 1.1.7
++ @radix-ui/react-avatar 1.1.10
++ @radix-ui/react-checkbox 1.3.2
++ @radix-ui/react-collapsible 1.1.11
++ @radix-ui/react-context-menu 2.2.15
++ @radix-ui/react-dialog 1.1.14
++ @radix-ui/react-dropdown-menu 2.1.15
++ @radix-ui/react-hover-card 1.1.14
++ @radix-ui/react-label 2.1.7
++ @radix-ui/react-menubar 1.1.15
++ @radix-ui/react-navigation-menu 1.2.13
++ @radix-ui/react-popover 1.1.14
++ @radix-ui/react-progress 1.1.7
++ @radix-ui/react-radio-group 1.3.7
++ @radix-ui/react-scroll-area 1.2.9
++ @radix-ui/react-select 2.2.5
++ @radix-ui/react-separator 1.1.7
++ @radix-ui/react-slider 1.3.5
++ @radix-ui/react-slot 1.2.3
++ @radix-ui/react-switch 1.2.5
++ @radix-ui/react-tabs 1.1.12
++ @radix-ui/react-toast 1.2.14
++ @radix-ui/react-toggle 1.1.9
++ @radix-ui/react-toggle-group 1.1.10
++ @radix-ui/react-tooltip 1.2.7
++ @supabase/supabase-js 2.52.0
++ @tanstack/react-query 5.83.0
++ class-variance-authority 0.7.1
++ clsx 2.1.1
++ cmdk 1.1.1
++ date-fns 3.6.0
++ embla-carousel-react 8.6.0
++ framer-motion 11.18.2
++ input-otp 1.4.2
++ lucide-react 0.462.0
++ next-themes 0.4.6
++ prismjs 1.30.0
++ react 19.1.1
++ react-day-picker 9.9.0
++ react-dom 19.1.1
++ react-dropzone 14.3.8
++ react-error-boundary 4.1.2
++ react-hook-form 7.60.0
++ react-resizable-panels 2.1.9
++ react-router-dom 6.30.1
++ recharts 2.15.4
++ sonner 1.7.4
++ tailwind-merge 2.6.0
++ tailwindcss-animate 1.0.7
++ uuid 10.0.0
++ vaul 1.1.2
++ zod 3.25.76
++ zustand 4.5.7
+
+devDependencies:
++ @eslint/js 9.31.0
++ @metagptx/vite-plugin-source-locator 0.0.6
++ @tailwindcss/aspect-ratio 0.4.2
++ @tailwindcss/typography 0.5.16
++ @types/node 22.16.5
++ @types/react 19.1.11
++ @types/react-dom 19.1.8
++ @vitejs/plugin-react-swc 3.11.0
++ autoprefixer 10.4.21
++ eslint 9.31.0
++ eslint-plugin-react-hooks 5.2.0
++ eslint-plugin-react-refresh 0.4.20
++ globals 15.15.0
++ lovable-tagger 1.1.8
++ postcss 8.5.6
++ tailwindcss 3.4.17
++ typescript 5.8.3
++ typescript-eslint 8.38.0
++ vite 5.4.19
+
+Done in 43s

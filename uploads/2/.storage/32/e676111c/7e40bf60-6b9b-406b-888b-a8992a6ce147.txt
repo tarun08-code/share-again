@@ -1,0 +1,5 @@
+$ pnpm run lint
+
+> shadcnui@ lint /workspace/papershare-fixed
+> eslint --quiet ./src
+
