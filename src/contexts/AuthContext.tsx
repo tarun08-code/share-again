@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, AuthContextType } from '@/types';
-import { supabase } from '@/lib/supabase';
-import { 
-  getCurrentUser, 
-  setCurrentUser, 
-  getUsers, 
-  addUser, 
-  updateUser as updateUserStorage, 
-  initializeStorage 
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import {
+  getCurrentUser,
+  setCurrentUser,
+  getUsers,
+  addUser,
+  updateUser as updateUserStorage,
+  initializeStorage
 } from '@/lib/storage';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,12 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check if Supabase is configured
-  const isSupabaseConfigured = () => {
-    return import.meta.env.VITE_SUPABASE_URL && 
-           import.meta.env.VITE_SUPABASE_ANON_KEY &&
-           import.meta.env.VITE_SUPABASE_URL !== 'your-supabase-url';
-  };
+
 
   useEffect(() => {
     if (isSupabaseConfigured()) {
@@ -121,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Fallback to localStorage
       const users = getUsers();
       const foundUser = users.find(u => u.email === email);
-      
+
       if (foundUser) {
         setCurrentUser(foundUser);
         setUser(foundUser);
@@ -147,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Fallback to localStorage
       const users = getUsers();
       const existingUser = users.find(u => u.email === userData.email);
-      
+
       if (existingUser) {
         return false;
       }
