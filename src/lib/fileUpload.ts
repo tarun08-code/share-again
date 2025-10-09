@@ -1,4 +1,3 @@
-import { supabase } from './supabase';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface UploadResult {
@@ -19,95 +18,127 @@ export interface FileUploadData {
   uploaderId: string;
 }
 
+// Mock data interfaces
+interface Paper {
+  id: string;
+  title: string;
+  description: string;
+  department_id: string;
+  subject: string;
+  type: string;
+  file_url: string;
+  thumbnail_url?: string;
+  upload_date: string;
+  uploader_id: string;
+  downloads: number;
+  tags: string[];
+  uploader?: { name: string };
+}
+
+interface Note {
+  id: string;
+  title: string;
+  content: string;
+  department_id: string;
+  subject: string;
+  upload_date: string;
+  uploader_id: string;
+  downloads: number;
+  tags: string[];
+  file_url?: string;
+  uploader?: { name: string };
+}
+
+// Local storage helpers
+const getPapersFromStorage = (): Paper[] => {
+  try {
+    const papers = localStorage.getItem('papers');
+    return papers ? JSON.parse(papers) : [];
+  } catch {
+    return [];
+  }
+};
+
+const savePapersToStorage = (papers: Paper[]) => {
+  localStorage.setItem('papers', JSON.stringify(papers));
+};
+
+const getNotesFromStorage = (): Note[] => {
+  try {
+    const notes = localStorage.getItem('notes');
+    return notes ? JSON.parse(notes) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveNotesToStorage = (notes: Note[]) => {
+  localStorage.setItem('notes', JSON.stringify(notes));
+};
+
+const getUsersFromStorage = () => {
+  try {
+    const users = localStorage.getItem('users');
+    return users ? JSON.parse(users) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveUsersToStorage = (users: any[]) => {
+  localStorage.setItem('users', JSON.stringify(users));
+};
+
 /**
- * Upload a file to Supabase Storage and create a database record
+ * Mock file upload - in a real app, this would upload to a cloud service
  */
 export async function uploadFile(data: FileUploadData): Promise<UploadResult> {
   try {
     const { file, uploaderId, type } = data;
 
-    // Generate unique filename
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${uploaderId}/${uuidv4()}.${fileExt}`;
+    // Simulate file upload delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Upload file to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('papers')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    if (uploadError) {
-      console.error('Upload error:', uploadError);
-      return {
-        success: false,
-        error: `Failed to upload file: ${uploadError.message}`
-      };
-    }
-
-    // Get public URL for the uploaded file
-    const { data: urlData } = supabase.storage
-      .from('papers')
-      .getPublicUrl(fileName);
-
-    if (!urlData?.publicUrl) {
-      return {
-        success: false,
-        error: 'Failed to get file URL'
-      };
-    }
+    // Generate mock file URL (in real app, this would be the actual uploaded file URL)
+    const mockFileUrl = `https://mock-storage.com/files/${uploaderId}/${uuidv4()}.${file.name.split('.').pop()}`;
 
     // Create database record
-    const dbData = {
-      title: data.title,
-      description: data.description || '',
-      department_id: data.department,
-      subject: data.courseCode,
-      type: data.type,
-      file_url: urlData.publicUrl,
-      uploader_id: uploaderId,
-      tags: [data.section, data.year, data.courseCode]
-    };
+    const id = uuidv4();
+    const uploadDate = new Date().toISOString();
 
     if (type === 'paper') {
-      const { error: dbError } = await supabase
-        .from('papers')
-        .insert(dbData);
-
-      if (dbError) {
-        console.error('Database error:', dbError);
-        // Clean up uploaded file if database insert fails
-        await supabase.storage.from('papers').remove([fileName]);
-        return {
-          success: false,
-          error: `Failed to save to database: ${dbError.message}`
-        };
-      }
+      const papers = getPapersFromStorage();
+      const newPaper: Paper = {
+        id,
+        title: data.title,
+        description: data.description || '',
+        department_id: data.department,
+        subject: data.courseCode,
+        type: data.type,
+        file_url: mockFileUrl,
+        upload_date: uploadDate,
+        uploader_id: uploaderId,
+        downloads: 0,
+        tags: [data.section, data.year, data.courseCode]
+      };
+      papers.push(newPaper);
+      savePapersToStorage(papers);
     } else {
-      // For notes, use the notes table
-      const { title, description, department_id, subject, uploader_id, tags, file_url } = dbData;
-      const { error: dbError } = await supabase
-        .from('notes')
-        .insert({
-          title,
-          content: description,
-          department_id,
-          subject,
-          file_url,
-          uploader_id,
-          tags
-        });
-
-      if (dbError) {
-        console.error('Database error:', dbError);
-        // Clean up uploaded file if database insert fails
-        await supabase.storage.from('papers').remove([fileName]);
-        return {
-          success: false,
-          error: `Failed to save to database: ${dbError.message}`
-        };
-      }
+      const notes = getNotesFromStorage();
+      const newNote: Note = {
+        id,
+        title: data.title,
+        content: data.description || '',
+        department_id: data.department,
+        subject: data.courseCode,
+        file_url: mockFileUrl,
+        upload_date: uploadDate,
+        uploader_id: uploaderId,
+        downloads: 0,
+        tags: [data.section, data.year, data.courseCode]
+      };
+      notes.push(newNote);
+      saveNotesToStorage(notes);
     }
 
     // Update user stats
@@ -115,7 +146,7 @@ export async function uploadFile(data: FileUploadData): Promise<UploadResult> {
 
     return {
       success: true,
-      fileUrl: urlData.publicUrl
+      fileUrl: mockFileUrl
     };
 
   } catch (error) {
@@ -136,18 +167,21 @@ export async function incrementUserStats(
   incrementBy: number = 1
 ): Promise<boolean> {
   try {
-    const { error } = await supabase.rpc('increment_user_stats', {
-      user_id: userId,
-      stat_type: statType,
-      increment_by: incrementBy
-    });
-
-    if (error) {
-      console.error('Error updating user stats:', error);
-      return false;
+    const users = getUsersFromStorage();
+    const userIndex = users.findIndex((u: any) => u.id === userId);
+    
+    if (userIndex !== -1) {
+      if (statType === 'uploads') {
+        users[userIndex].uploadsCount = (users[userIndex].uploadsCount || 0) + incrementBy;
+        users[userIndex].points = (users[userIndex].points || 0) + (incrementBy * 5); // 5 points per upload
+      } else if (statType === 'downloads') {
+        users[userIndex].downloadsCount = (users[userIndex].downloadsCount || 0) + incrementBy;
+        users[userIndex].points = (users[userIndex].points || 0) + (incrementBy * 1); // 1 point per download
+      }
+      saveUsersToStorage(users);
+      return true;
     }
-
-    return true;
+    return false;
   } catch (error) {
     console.error('Unexpected error updating user stats:', error);
     return false;
@@ -170,11 +204,13 @@ export async function downloadFile(
 
     console.log('Starting download for:', { contentType, itemId: item.id, userId, fileUrl: item.file_url });
 
-    // Track the download in database first
+    // Track the download in local storage
     const trackingSuccess = await handleDownloadTracking(contentType, item.id, userId);
 
     if (trackingSuccess) {
       console.log('Download tracked successfully');
+      // In a real app, you would trigger the actual file download here
+      window.open(item.file_url, '_blank');
     } else {
       console.warn('Download tracking failed, but continuing with download');
     }
@@ -195,17 +231,24 @@ export async function handleDownloadTracking(
   userId: string
 ): Promise<boolean> {
   try {
-    const { error } = await supabase.rpc('increment_download_count', {
-      content_type: contentType,
-      content_id: contentId,
-      user_id: userId
-    });
-
-    if (error) {
-      console.error('Error handling download tracking:', error);
-      return false;
+    if (contentType === 'paper') {
+      const papers = getPapersFromStorage();
+      const paperIndex = papers.findIndex(p => p.id === contentId);
+      if (paperIndex !== -1) {
+        papers[paperIndex].downloads = (papers[paperIndex].downloads || 0) + 1;
+        savePapersToStorage(papers);
+      }
+    } else {
+      const notes = getNotesFromStorage();
+      const noteIndex = notes.findIndex(n => n.id === contentId);
+      if (noteIndex !== -1) {
+        notes[noteIndex].downloads = (notes[noteIndex].downloads || 0) + 1;
+        saveNotesToStorage(notes);
+      }
     }
 
+    // Award points to downloading user
+    await incrementUserStats(userId, 'downloads', 1);
     return true;
   } catch (error) {
     console.error('Unexpected error handling download tracking:', error);
@@ -229,7 +272,9 @@ export async function viewFile(
 
     console.log('Opening file for viewing:', { contentType, itemId: item.id, fileUrl: item.file_url });
 
-    // Optionally track as a view (without download count increase)
+    // Open file in new tab
+    window.open(item.file_url, '_blank');
+
     if (userId) {
       console.log('File viewed by user:', userId);
     }
@@ -242,7 +287,7 @@ export async function viewFile(
 }
 
 /**
- * Get papers from database with filters
+ * Get papers from local storage with filters
  */
 export async function getPapers(filters?: {
   department?: string;
@@ -251,38 +296,35 @@ export async function getPapers(filters?: {
   offset?: number;
 }) {
   try {
-    let query = supabase
-      .from('papers')
-      .select(`
-        *,
-        uploader:users(name)
-      `)
-      .order('created_at', { ascending: false });
+    let papers = getPapersFromStorage();
+    const users = getUsersFromStorage();
 
+    // Add uploader name to papers
+    papers = papers.map(paper => ({
+      ...paper,
+      uploader: { name: users.find((u: any) => u.id === paper.uploader_id)?.name || 'Unknown' }
+    }));
+
+    // Apply filters
     if (filters?.department) {
-      query = query.eq('department_id', filters.department);
+      papers = papers.filter(p => p.department_id === filters.department);
     }
 
     if (filters?.subject) {
-      query = query.eq('subject', filters.subject);
+      papers = papers.filter(p => p.subject === filters.subject);
     }
 
-    if (filters?.limit) {
-      query = query.limit(filters.limit);
+    // Sort by upload date (newest first)
+    papers.sort((a, b) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime());
+
+    // Apply pagination
+    if (filters?.offset !== undefined && filters?.limit !== undefined) {
+      papers = papers.slice(filters.offset, filters.offset + filters.limit);
+    } else if (filters?.limit) {
+      papers = papers.slice(0, filters.limit);
     }
 
-    if (filters?.offset) {
-      query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching papers:', error);
-      return { data: [], error: error.message };
-    }
-
-    return { data: data || [], error: null };
+    return { data: papers, error: null };
   } catch (error) {
     console.error('Unexpected error fetching papers:', error);
     return { data: [], error: 'An unexpected error occurred' };
@@ -290,7 +332,7 @@ export async function getPapers(filters?: {
 }
 
 /**
- * Get notes from database with filters
+ * Get notes from local storage with filters
  */
 export async function getNotes(filters?: {
   department?: string;
@@ -299,38 +341,35 @@ export async function getNotes(filters?: {
   offset?: number;
 }) {
   try {
-    let query = supabase
-      .from('notes')
-      .select(`
-        *,
-        uploader:users(name)
-      `)
-      .order('created_at', { ascending: false });
+    let notes = getNotesFromStorage();
+    const users = getUsersFromStorage();
 
+    // Add uploader name to notes
+    notes = notes.map(note => ({
+      ...note,
+      uploader: { name: users.find((u: any) => u.id === note.uploader_id)?.name || 'Unknown' }
+    }));
+
+    // Apply filters
     if (filters?.department) {
-      query = query.eq('department_id', filters.department);
+      notes = notes.filter(n => n.department_id === filters.department);
     }
 
     if (filters?.subject) {
-      query = query.eq('subject', filters.subject);
+      notes = notes.filter(n => n.subject === filters.subject);
     }
 
-    if (filters?.limit) {
-      query = query.limit(filters.limit);
+    // Sort by upload date (newest first)
+    notes.sort((a, b) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime());
+
+    // Apply pagination
+    if (filters?.offset !== undefined && filters?.limit !== undefined) {
+      notes = notes.slice(filters.offset, filters.offset + filters.limit);
+    } else if (filters?.limit) {
+      notes = notes.slice(0, filters.limit);
     }
 
-    if (filters?.offset) {
-      query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching notes:', error);
-      return { data: [], error: error.message };
-    }
-
-    return { data: data || [], error: null };
+    return { data: notes, error: null };
   } catch (error) {
     console.error('Unexpected error fetching notes:', error);
     return { data: [], error: 'An unexpected error occurred' };
@@ -353,54 +392,59 @@ export async function searchContent(
     const limit = searchFilters.limit || 20;
     const searchType = searchFilters.type || 'both';
 
-    const results: { papers: any[], notes: any[] } = { papers: [], notes: [] };
+    const results: { papers: Paper[], notes: Note[] } = { papers: [], notes: [] };
+    const users = getUsersFromStorage();
 
     if (searchType === 'papers' || searchType === 'both') {
-      let papersQuery = supabase
-        .from('papers')
-        .select(`
-          *,
-          uploader:users(name)
-        `)
-        .or(`title.ilike.%${query}%, description.ilike.%${query}%, subject.ilike.%${query}%`)
-        .order('created_at', { ascending: false })
-        .limit(limit);
+      let papers = getPapersFromStorage();
+      
+      // Filter by search query
+      papers = papers.filter(paper => 
+        paper.title.toLowerCase().includes(query.toLowerCase()) ||
+        paper.description.toLowerCase().includes(query.toLowerCase()) ||
+        paper.subject.toLowerCase().includes(query.toLowerCase())
+      );
 
+      // Apply department filter
       if (searchFilters.department) {
-        papersQuery = papersQuery.eq('department_id', searchFilters.department);
+        papers = papers.filter(p => p.department_id === searchFilters.department);
       }
 
-      const { data: papersData, error: papersError } = await papersQuery;
+      // Add uploader names
+      papers = papers.map(paper => ({
+        ...paper,
+        uploader: { name: users.find((u: any) => u.id === paper.uploader_id)?.name || 'Unknown' }
+      }));
 
-      if (papersError) {
-        console.error('Error searching papers:', papersError);
-      } else {
-        results.papers = papersData || [];
-      }
+      // Sort and limit
+      papers.sort((a, b) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime());
+      results.papers = papers.slice(0, limit);
     }
 
     if (searchType === 'notes' || searchType === 'both') {
-      let notesQuery = supabase
-        .from('notes')
-        .select(`
-          *,
-          uploader:users(name)
-        `)
-        .or(`title.ilike.%${query}%, content.ilike.%${query}%, subject.ilike.%${query}%`)
-        .order('created_at', { ascending: false })
-        .limit(limit);
+      let notes = getNotesFromStorage();
+      
+      // Filter by search query
+      notes = notes.filter(note => 
+        note.title.toLowerCase().includes(query.toLowerCase()) ||
+        note.content.toLowerCase().includes(query.toLowerCase()) ||
+        note.subject.toLowerCase().includes(query.toLowerCase())
+      );
 
+      // Apply department filter
       if (searchFilters.department) {
-        notesQuery = notesQuery.eq('department_id', searchFilters.department);
+        notes = notes.filter(n => n.department_id === searchFilters.department);
       }
 
-      const { data: notesData, error: notesError } = await notesQuery;
+      // Add uploader names
+      notes = notes.map(note => ({
+        ...note,
+        uploader: { name: users.find((u: any) => u.id === note.uploader_id)?.name || 'Unknown' }
+      }));
 
-      if (notesError) {
-        console.error('Error searching notes:', notesError);
-      } else {
-        results.notes = notesData || [];
-      }
+      // Sort and limit
+      notes.sort((a, b) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime());
+      results.notes = notes.slice(0, limit);
     }
 
     return { data: results, error: null };
@@ -417,19 +461,15 @@ export async function toggleStarPaper(userId: string, paperId: string): Promise<
   try {
     console.log('Toggling star for paper:', { userId, paperId });
 
-    // Get current user data
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('starred_papers')
-      .eq('id', userId)
-      .single();
+    const users = getUsersFromStorage();
+    const userIndex = users.findIndex((u: any) => u.id === userId);
 
-    if (userError) {
-      console.error('Error fetching user data:', userError);
+    if (userIndex === -1) {
+      console.error('User not found');
       return false;
     }
 
-    const currentStarredPapers = userData.starred_papers || [];
+    const currentStarredPapers = users[userIndex].starredPapers || [];
     const isCurrentlyStarred = currentStarredPapers.includes(paperId);
 
     console.log('Current starred papers:', currentStarredPapers);
@@ -446,16 +486,8 @@ export async function toggleStarPaper(userId: string, paperId: string): Promise<
       console.log('Adding to starred, new array:', newStarredPapers);
     }
 
-    // Update user's starred papers
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ starred_papers: newStarredPapers })
-      .eq('id', userId);
-
-    if (updateError) {
-      console.error('Error updating starred papers:', updateError);
-      return false;
-    }
+    users[userIndex].starredPapers = newStarredPapers;
+    saveUsersToStorage(users);
 
     console.log('Successfully updated starred papers');
     return true;
@@ -468,19 +500,15 @@ export async function toggleStarPaper(userId: string, paperId: string): Promise<
  */
 export async function toggleStarNote(userId: string, noteId: string): Promise<boolean> {
   try {
-    // Get current user data
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('starred_notes')
-      .eq('id', userId)
-      .single();
+    const users = getUsersFromStorage();
+    const userIndex = users.findIndex((u: any) => u.id === userId);
 
-    if (userError) {
-      console.error('Error fetching user data:', userError);
+    if (userIndex === -1) {
+      console.error('User not found');
       return false;
     }
 
-    const currentStarredNotes = userData.starred_notes || [];
+    const currentStarredNotes = users[userIndex].starredNotes || [];
     const isCurrentlyStarred = currentStarredNotes.includes(noteId);
 
     let newStarredNotes;
@@ -492,16 +520,8 @@ export async function toggleStarNote(userId: string, noteId: string): Promise<bo
       newStarredNotes = [...currentStarredNotes, noteId];
     }
 
-    // Update user's starred notes
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ starred_notes: newStarredNotes })
-      .eq('id', userId);
-
-    if (updateError) {
-      console.error('Error updating starred notes:', updateError);
-      return false;
-    }
+    users[userIndex].starredNotes = newStarredNotes;
+    saveUsersToStorage(users);
 
     return true;
   } catch (error) {
@@ -515,50 +535,26 @@ export async function toggleStarNote(userId: string, noteId: string): Promise<bo
  */
 export async function getStarredPapers(userId: string) {
   try {
-    // First get user's starred papers list
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('starred_papers')
-      .eq('id', userId)
-      .single();
+    const users = getUsersFromStorage();
+    const user = users.find((u: any) => u.id === userId);
 
-    if (userError) {
-      console.error('Error fetching user data for starred papers:', userError);
+    if (!user || !user.starredPapers || user.starredPapers.length === 0) {
       return { data: [], error: null };
     }
 
-    if (!userData || !userData.starred_papers || userData.starred_papers.length === 0) {
-      return { data: [], error: null };
-    }
+    const papers = getPapersFromStorage();
+    const starredPapers = papers.filter(paper => user.starredPapers.includes(paper.id));
 
-    // Filter out any invalid UUIDs and ensure we have valid UUIDs
-    const validStarredPapers = userData.starred_papers.filter((id: string) => {
-      // Check if it's a valid UUID format (36 characters with 4 hyphens)
-      return id && typeof id === 'string' && id.length === 36 && id.includes('-');
-    });
+    // Add uploader names
+    const starredPapersWithUploaders = starredPapers.map(paper => ({
+      ...paper,
+      uploader: { name: users.find((u: any) => u.id === paper.uploader_id)?.name || 'Unknown' }
+    }));
 
-    if (validStarredPapers.length === 0) {
-      return { data: [], error: null };
-    }
+    // Sort by upload date (newest first)
+    starredPapersWithUploaders.sort((a, b) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime());
 
-    console.log('Fetching starred papers for user:', userId, 'with IDs:', validStarredPapers);
-
-    // Then fetch the actual paper data
-    const { data: papers, error: papersError } = await supabase
-      .from('papers')
-      .select(`
-        *,
-        uploader:users(name)
-      `)
-      .in('id', validStarredPapers)
-      .order('created_at', { ascending: false });
-
-    if (papersError) {
-      console.error('Error fetching starred papers:', papersError);
-      return { data: [], error: null }; // Return empty array instead of error to prevent UI issues
-    }
-
-    return { data: papers || [], error: null };
+    return { data: starredPapersWithUploaders, error: null };
   } catch (error) {
     console.error('Unexpected error fetching starred papers:', error);
     return { data: [], error: null };
@@ -570,49 +566,26 @@ export async function getStarredPapers(userId: string) {
  */
 export async function getStarredNotes(userId: string) {
   try {
-    // First get user's starred notes list
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('starred_notes')
-      .eq('id', userId)
-      .single();
+    const users = getUsersFromStorage();
+    const user = users.find((u: any) => u.id === userId);
 
-    if (userError) {
-      console.error('Error fetching user data for starred notes:', userError);
+    if (!user || !user.starredNotes || user.starredNotes.length === 0) {
       return { data: [], error: null };
     }
 
-    if (!userData || !userData.starred_notes || userData.starred_notes.length === 0) {
-      return { data: [], error: null };
-    }
+    const notes = getNotesFromStorage();
+    const starredNotes = notes.filter(note => user.starredNotes.includes(note.id));
 
-    // Filter out any invalid UUIDs
-    const validStarredNotes = userData.starred_notes.filter((id: string) => {
-      return id && typeof id === 'string' && id.length === 36 && id.includes('-');
-    });
+    // Add uploader names
+    const starredNotesWithUploaders = starredNotes.map(note => ({
+      ...note,
+      uploader: { name: users.find((u: any) => u.id === note.uploader_id)?.name || 'Unknown' }
+    }));
 
-    if (validStarredNotes.length === 0) {
-      return { data: [], error: null };
-    }
+    // Sort by upload date (newest first)
+    starredNotesWithUploaders.sort((a, b) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime());
 
-    console.log('Fetching starred notes for user:', userId, 'with IDs:', validStarredNotes);
-
-    // Then fetch the actual note data
-    const { data: notes, error: notesError } = await supabase
-      .from('notes')
-      .select(`
-        *,
-        uploader:users(name)
-      `)
-      .in('id', validStarredNotes)
-      .order('created_at', { ascending: false });
-
-    if (notesError) {
-      console.error('Error fetching starred notes:', notesError);
-      return { data: [], error: null }; // Return empty array instead of error
-    }
-
-    return { data: notes || [], error: null };
+    return { data: starredNotesWithUploaders, error: null };
   } catch (error) {
     console.error('Unexpected error fetching starred notes:', error);
     return { data: [], error: null };
